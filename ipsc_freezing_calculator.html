@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>iPSC Freezing Calculator v2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Helvetica Neue", Arial, sans-serif;
+      color-scheme: light dark;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      min-height: 100vh;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 480px;
+      padding: 16px;
+      box-sizing: border-box;
+      margin: auto;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 18px;
+      padding: 20px 18px 18px;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.8);
+      border: 1px solid #1f2937;
+    }
+
+    h1 {
+      font-size: 1.05rem;
+      margin: 0 0 4px;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 14px;
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: #d1d5db;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .row {
+      margin-bottom: 10px;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    input[type="number"]::placeholder {
+      color: #6b7280;
+    }
+
+    input[type="number"]:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px #38bdf8;
+    }
+
+    .unit {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      white-space: nowrap;
+    }
+
+    .note {
+      font-size: 0.7rem;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #22d3ee, #6366f1);
+      color: white;
+      margin-bottom: 12px;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .result {
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: #020617;
+      border: 1px solid #1e293b;
+      font-size: 0.8rem;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .result-label {
+      color: #9ca3af;
+    }
+
+    .result-value {
+      font-weight: 600;
+      color: #f9fafb;
+    }
+
+    .status {
+      margin-top: 6px;
+      font-size: 0.78rem;
+    }
+
+    .status.ok {
+      color: #4ade80;
+    }
+
+    .status.warn {
+      color: #fbbf24;
+    }
+
+    .status.crit {
+      color: #f97373;
+    }
+
+    .footer {
+      margin-top: 10px;
+      font-size: 0.65rem;
+      color: #6b7280;
+      text-align: right;
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 0.65rem;
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: #0b1120;
+      border: 1px solid #1f2937;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <div class="pill">iPSC Freezing Helper</div>
+      <h1>E8 Volume Calculator v2</h1>
+      <div class="subtitle">
+        Target: <b>2×10⁶ cells/mL</b> after dilution.<br />
+        Enter your Countess reading and the volume you resuspended in.
+      </div>
+
+      <div class="row">
+        <label for="concInput">Countess reading</label>
+        <div class="input-row">
+          <input
+            id="concInput"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="e.g. 4.75"
+          />
+          <div class="unit">× 10⁶ cells/mL</div>
+        </div>
+        <div class="note">
+          If Countess says <b>4.75×10⁶</b>, just enter <b>4.75</b>.
+        </div>
+      </div>
+
+      <div class="row">
+        <label for="volInput">Starting volume (what you resuspended in)</label>
+        <div class="input-row">
+          <input
+            id="volInput"
+            type="number"
+            step="0.1"
+            min="0.1"
+            placeholder="e.g. 1, 2, 3"
+          />
+          <div class="unit">mL</div>
+        </div>
+        <div class="note">
+          Typical values: 1 mL, 2 mL, or 3 mL.
+        </div>
+      </div>
+
+      <button onclick="calculate()">Calculate E8 Volume</button>
+
+      <div id="resultBox" class="result" style="display:none;">
+        <div class="result-row">
+          <div class="result-label">Final volume:</div>
+          <div class="result-value"><span id="finalVol"></span> mL</div>
+        </div>
+        <div class="result-row">
+          <div class="result-label">Add this much E8:</div>
+          <div class="result-value"><span id="e8Vol"></span> mL</div>
+        </div>
+        <div class="result-row">
+          <div class="result-label">Starting volume:</div>
+          <div class="result-value"><span id="startVolLabel"></span> mL</div>
+        </div>
+        <div id="statusText" class="status"></div>
+      </div>
+
+      <div class="footer">
+        If reading &lt; 2.0 → concentrate cells, don’t dilute.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function roundTo(value, decimals) {
+      const factor = Math.pow(10, decimals);
+      return Math.round(value * factor) / factor;
+    }
+
+    function calculate() {
+      const concInput = document.getElementById("concInput");
+      const volInput = document.getElementById("volInput");
+
+      const rawConc = parseFloat(concInput.value);
+      const startVol = parseFloat(volInput.value);
+
+      const resultBox = document.getElementById("resultBox");
+      const finalVolSpan = document.getElementById("finalVol");
+      const e8VolSpan = document.getElementById("e8Vol");
+      const startVolLabel = document.getElementById("startVolLabel");
+      const statusText = document.getElementById("statusText");
+
+      if (isNaN(rawConc) || rawConc <= 0 || isNaN(startVol) || startVol <= 0) {
+        resultBox.style.display = "none";
+        return;
+      }
+
+      const X = rawConc;         // in “millions” (×10^6 cells/mL)
+      const target = 2.0;        // target 2×10^6 cells/mL
+
+      // Too dilute for dilution step: tell user to concentrate instead
+      if (X < target) {
+        resultBox.style.display = "block";
+        finalVolSpan.textContent = "–";
+        e8VolSpan.textContent = "0.000";
+        startVolLabel.textContent = startVol.toFixed(2);
+        statusText.textContent =
+          "Concentration is below 2×10⁶ cells/mL. Do NOT add E8; spin down and resuspend in a smaller volume or combine wells.";
+        statusText.className = "status crit";
+        return;
+      }
+
+      // Final volume in mL:
+      // total cells = X * 10^6 * startVol
+      // final conc = 2×10^6 → finalVol = (X * startVol) / 2
+      const finalVolume = (X * startVol) / target;
+      const e8ToAdd = finalVolume - startVol;
+
+      resultBox.style.display = "block";
+      finalVolSpan.textContent = roundTo(finalVolume, 3).toFixed(3);
+      e8VolSpan.textContent = roundTo(e8ToAdd, 3).toFixed(3);
+      startVolLabel.textContent = startVol.toFixed(2);
+
+      if (X >= 2 && X <= 5) {
+        statusText.textContent =
+          "OK to freeze. Use this E8 volume and proceed with freezing protocol.";
+        statusText.className = "status ok";
+      } else if (X > 5 && X <= 8) {
+        statusText.textContent =
+          "High concentration but acceptable. Make sure cells are well resuspended and mixed.";
+        statusText.className = "status warn";
+      } else {
+        statusText.textContent =
+          "Very high concentration. Double-check Countess reading and pellet quality.";
+        statusText.className = "status warn";
+      }
+    }
+  </script>
+</body>
+</html>
